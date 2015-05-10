@@ -3,12 +3,41 @@
 Window *window;
 static TextLayer *s_text_layer;
 static TextLayer* s_time_layer;
+static TextLayer* s_weather_layer;
+
+static void update_time() {
+  // Get a tm structure
+  time_t temp = time(NULL); 
+  struct tm *tick_time = localtime(&temp);
+
+  // Create a long-lived buffer
+  static char buffer[] = "00:00";
+
+  // Write the current hours and minutes into the buffer
+  if(clock_is_24h_style() == true) {
+    // Use 24 hour format
+    strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
+  } else {
+    // Use 12 hour format
+    strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
+  }
+
+  // Display this time on the TextLayer
+  text_layer_set_text(s_time_layer, buffer);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+	update_time();
+}
 
 void handle_init(void) {
 	// Create a window and other layers
 	window = window_create();
 	s_text_layer = text_layer_create(GRect(0, 0, 144, 154));
 	s_time_layer = text_layer_create(GRect(0,40,144,114));
+	
+	// Register with TickTimerService
+	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 	
 	// Setup for Text Layer
 	text_layer_set_text(s_text_layer, "Ecolab");
