@@ -7,6 +7,10 @@ var xhrRequest = function (url, type, callback) {
   xhr.send();
 };
 
+function celciusToFahrenheit(temp) {
+	return temp * 9.0/5.0 + 32;
+}
+
 function locationSuccess(pos) {
   // Construct URL
   var url = "http://api.openweathermap.org/data/2.5/weather?lat=" +
@@ -20,16 +24,12 @@ function locationSuccess(pos) {
 
       // Temperature in Kelvin requires adjustment
       var temperature = Math.round(json.main.temp - 273.15);
+			temperature = celciusToFahrenheit(temperature);
       console.log("Temperature is " + temperature);
-
-      // Conditions
-      var conditions = json.weather[0].main;      
-      console.log("Conditions are " + conditions);
       
       // Assemble dictionary using our keys
       var dictionary = {
         "KEY_TEMPERATURE": temperature,
-        "KEY_CONDITIONS": conditions
       };
 
       // Send to Pebble

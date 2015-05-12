@@ -1,7 +1,6 @@
 {
     "appKeys": {
         "KEY_CHANGE": 3,
-        "KEY_CONDITIONS": 1,
         "KEY_PRICE": 2,
         "KEY_TEMPERATURE": 0
     },
