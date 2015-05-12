@@ -11,7 +11,13 @@
     "longName": "Ecolab",
     "projectType": "native",
     "resources": {
-        "media": []
+        "media": [
+            {
+                "file": "images/ecolab_bw_w_borders.png",
+                "name": "IMAGE_ECOLAB",
+                "type": "png"
+            }
+        ]
     },
     "sdkVersion": "3",
     "shortName": "Ecolab",

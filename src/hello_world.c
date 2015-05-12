@@ -10,6 +10,9 @@ Window *window;
 static TextLayer* s_time_layer;
 static TextLayer* s_weather_layer;
 static TextLayer* s_stock_price_layer;
+static TextLayer* s_date_layer;
+static BitmapLayer * s_background_layer;
+static GBitmap * s_background_bitmap;
 
 static void update_time() {
   // Get a tm structure
@@ -17,19 +20,23 @@ static void update_time() {
   struct tm *tick_time = localtime(&temp);
 
   // Create a long-lived buffer
-  static char buffer[] = "00:00";
+  static char time_buffer[] = "00:00";
+	static char date_buffer[] = "01/01";
 
   // Write the current hours and minutes into the buffer
   if(clock_is_24h_style() == true) {
     // Use 24 hour format
-    strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
+    strftime(time_buffer, sizeof("00:00"), "%H:%M", tick_time);
   } else {
     // Use 12 hour format
-    strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
+    strftime(time_buffer, sizeof("00:00"), "%I:%M", tick_time);
   }
+	
+	strftime(date_buffer, sizeof(date_buffer), "%m/%d", tick_time);
 
   // Display this time on the TextLayer
-  text_layer_set_text(s_time_layer, buffer);
+  text_layer_set_text(s_time_layer, time_buffer);
+	text_layer_set_text(s_date_layer, date_buffer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -87,6 +94,11 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 }
 
 void handle_init(void) {
+	//Create bitmap
+	s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ECOLAB);
+	s_background_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
+	bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
+	
 	// Register callbacks
 	app_message_register_inbox_received(inbox_received_callback);
 	app_message_register_inbox_dropped(inbox_dropped_callback);
@@ -98,22 +110,23 @@ void handle_init(void) {
 	
 	// Create a window and other layers
 	window = window_create();
-	s_time_layer = text_layer_create(GRect(0,40,144,114));
-	s_weather_layer = text_layer_create(GRect(0, 80, 144, 74));
-	s_stock_price_layer = text_layer_create(GRect(0, 120, 144, 34));
+	s_time_layer = text_layer_create(GRect(0,140,144,20));
+	s_weather_layer = text_layer_create(GRect(0, 140, 48, 20));
+	s_stock_price_layer = text_layer_create(GRect(0, 100, 144, 30));
+	s_date_layer = text_layer_create(GRect(96, 140, 48, 20));
 	
 	// Register with TickTimerService
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 	
 	// Setup for time layer
 	text_layer_set_text(s_time_layer, "00:00");
-	text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+	text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_time_layer, GColorClear);
 	
 	// Setup for weather layer
 	text_layer_set_text(s_weather_layer, "...");
-	text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+	text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_weather_layer, GColorClear);
 	
@@ -123,8 +136,16 @@ void handle_init(void) {
 	text_layer_set_text_alignment(s_stock_price_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_stock_price_layer, GColorClear);
 	
+	// Setup for date layer
+	text_layer_set_text(s_date_layer, "...");
+	text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
+	text_layer_set_background_color(s_date_layer, GColorClear);
+	
 	// Add layers to window
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_stock_price_layer));
 
@@ -140,6 +161,8 @@ void handle_deinit(void) {
 	text_layer_destroy(s_time_layer);
 	text_layer_destroy(s_weather_layer);
 	text_layer_destroy(s_stock_price_layer);
+	text_layer_destroy(s_date_layer);
+	bitmap_layer_destroy(s_background_layer);
 	window_destroy(window);
 }
 
