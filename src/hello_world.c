@@ -13,6 +13,7 @@ static TextLayer* s_stock_price_layer;
 static TextLayer* s_date_layer;
 static BitmapLayer * s_background_layer;
 static GBitmap * s_background_bitmap;
+static  int isNegative;
 
 static void update_time() {
   // Get a tm structure
@@ -65,6 +66,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 			break;
 		case KEY_CHANGE:
 			snprintf(stock_change_buffer, sizeof(stock_change_buffer), "%s", t->value->cstring);
+			if(stock_change_buffer[0] == '-') {
+				isNegative = 1;
+			} else isNegative = 0;
 			break;
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -140,7 +144,11 @@ void handle_init(void) {
 	text_layer_set_text(s_stock_price_layer, "...");
 	text_layer_set_font(s_stock_price_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
 	#ifdef PBL_COLOR
-		text_layer_set_text_color(s_stock_price_layer, GColorBlue);	
+		if(isNegative) {
+		  text_layer_set_text_color(s_stock_price_layer, GColorRed);	
+	  } else {
+			text_layer_set_text_color(s_stock_price_layer, GColorJaegerGreen);
+	  }
 	#endif
 	text_layer_set_text_alignment(s_stock_price_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_stock_price_layer, GColorClear);
