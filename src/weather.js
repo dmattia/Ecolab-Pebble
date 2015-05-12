@@ -15,7 +15,6 @@ function locationSuccess(pos) {
   // Send request to OpenWeatherMap
   xhrRequest(url, 'GET', 
     function(responseText) {
-			console.log(responseText);
       // responseText contains a JSON object with weather info
       var json = JSON.parse(responseText);
 

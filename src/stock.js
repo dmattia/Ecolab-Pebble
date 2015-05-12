@@ -1,4 +1,4 @@
-/*var xhrRequest = function (url, type, callback) {
+var xhrRequest = function (url, type, callback) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {
     callback(this.responseText);
@@ -7,31 +7,37 @@
   xhr.send();
 };
 
-function locationSuccess(pos) {
-  // Construct URL
+function getPrice() {
+   // Construct URL
   var url = "http://www.google.com/finance/info?q=NSE:ECL";
 
   // Send request to OpenWeatherMap
   xhrRequest(url, 'GET', 
     function(responseText) {
-      // responseText contains a JSON object with weather info
+			responseText = responseText.replace(/(\r\n|\n|\r)/gm,"");
+			responseText = responseText.substring(4);
+			responseText = responseText.substring(0,responseText.length-1);
+      // responseText contains a JSON object with stock info
       var json = JSON.parse(responseText);
 
-      // Temperature in Kelvin requires adjustment
-      var temperature = Math.round(json.main.temp - 273.15);
-			var price = json.
-      console.log("Temperature is " + temperature);
+      // Get stock price
+			var price = json.l;
+      console.log("Stock price is " + price);
+			
+			// Get stock change
+			var change = json.c;
+			console.log("Stock change is " + change);
       
       // Assemble dictionary using our keys
       var dictionary = {
-        "KEY_TEMPERATURE": temperature,
-        "KEY_CONDITIONS": conditions
+        "KEY_PRICE": price,
+				"KEY_CHANGE": change
       };
 
       // Send to Pebble
       Pebble.sendAppMessage(dictionary,
         function(e) {
-          console.log("Weather info sent to Pebble successfully!");
+          console.log("Stock info sent to Pebble successfully!");
         },
         function(e) {
           console.log("Error sending weather info to Pebble!");
@@ -41,25 +47,13 @@ function locationSuccess(pos) {
   );
 }
 
-function locationError(err) {
-  console.log("Error requesting location!");
-}
-
-function getWeather() {
-  navigator.geolocation.getCurrentPosition(
-    locationSuccess,
-    locationError,
-    {timeout: 15000, maximumAge: 60000}
-  );
-}
-
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
     console.log("PebbleKit JS ready!");
 
     // Get the initial weather
-    getWeather();
+    getPrice();
   }
 );
 
@@ -67,6 +61,6 @@ Pebble.addEventListener('ready',
 Pebble.addEventListener('appmessage',
   function(e) {
     console.log("AppMessage received!");
-    getWeather();
+    getPrice();
   }                     
-);*/
+);

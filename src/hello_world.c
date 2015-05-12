@@ -2,13 +2,16 @@
 
 enum {
   KEY_TEMPERATURE = 0,
-  KEY_CONDITIONS = 1
+  KEY_CONDITIONS = 1,
+	KEY_PRICE = 2,
+	KEY_CHANGE = 3
 };
 	
 Window *window;
 static TextLayer* s_text_layer;
 static TextLayer* s_time_layer;
 static TextLayer* s_weather_layer;
+static TextLayer* s_stock_price_layer;
 
 static void update_time() {
   // Get a tm structure
@@ -40,6 +43,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   static char temperature_buffer[8];
   static char conditions_buffer[32];
   static char weather_layer_buffer[32];
+	static char stock_price_buffer[8];
+	static char stock_change_buffer[8];
+	static char stock_layer_buffer[16];
   
   // Read first item
   Tuple *t = dict_read_first(iterator);
@@ -54,6 +60,12 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     case KEY_CONDITIONS:
       snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
       break;
+		case KEY_PRICE:
+			snprintf(stock_price_buffer, sizeof(stock_price_buffer), "%s", t->value->cstring);
+			break;
+		case KEY_CHANGE:
+			snprintf(stock_change_buffer, sizeof(stock_change_buffer), "%s", t->value->cstring);
+			break;
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
       break;
@@ -65,7 +77,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 	
   // Assemble full string and display
   snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+	snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s %s", stock_price_buffer, stock_change_buffer);
   text_layer_set_text(s_weather_layer, weather_layer_buffer);
+	text_layer_set_text(s_stock_price_layer, stock_layer_buffer);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -95,6 +109,7 @@ void handle_init(void) {
 	s_text_layer = text_layer_create(GRect(0, 0, 144, 154));
 	s_time_layer = text_layer_create(GRect(0,40,144,114));
 	s_weather_layer = text_layer_create(GRect(0, 80, 144, 74));
+	s_stock_price_layer = text_layer_create(GRect(0, 120, 144, 34));
 	
 	// Register with TickTimerService
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
@@ -117,10 +132,18 @@ void handle_init(void) {
 	text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_weather_layer, GColorClear);
 	
+	// Setup for stock layer
+	text_layer_set_text(s_stock_price_layer, "...");
+	text_layer_set_font(s_stock_price_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+	text_layer_set_text_alignment(s_stock_price_layer, GTextAlignmentCenter);
+	text_layer_set_background_color(s_stock_price_layer, GColorClear);
+	
 	// Add layers to window
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_stock_price_layer));
+
 
 	// Push the window
 	window_stack_push(window, true);
