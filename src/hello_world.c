@@ -121,24 +121,36 @@ void handle_init(void) {
 	// Setup for time layer
 	text_layer_set_text(s_time_layer, "00:00");
 	text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	#ifdef PBL_COLOR
+		text_layer_set_text_color(s_time_layer, GColorBlue);	
+	#endif
 	text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_time_layer, GColorClear);
 	
 	// Setup for weather layer
 	text_layer_set_text(s_weather_layer, "...");
 	text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	#ifdef PBL_COLOR
+		text_layer_set_text_color(s_weather_layer, GColorBlue);	
+	#endif
 	text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_weather_layer, GColorClear);
 	
 	// Setup for stock layer
 	text_layer_set_text(s_stock_price_layer, "...");
 	text_layer_set_font(s_stock_price_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+	#ifdef PBL_COLOR
+		text_layer_set_text_color(s_stock_price_layer, GColorBlue);	
+	#endif
 	text_layer_set_text_alignment(s_stock_price_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_stock_price_layer, GColorClear);
 	
 	// Setup for date layer
 	text_layer_set_text(s_date_layer, "...");
 	text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	#ifdef PBL_COLOR
+		text_layer_set_text_color(s_date_layer, GColorBlue);	
+	#endif
 	text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_date_layer, GColorClear);
 	
