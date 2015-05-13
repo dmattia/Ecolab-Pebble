@@ -26,12 +26,17 @@ function getPrice() {
 			
 			// Get stock change
 			var change = json.c;
+			var isNegative = 0;
 			console.log("Stock change is " + change);
+			if(parseFloat(change) < 0) {
+				isNegative = 1;
+			}
       
       // Assemble dictionary using our keys
       var dictionary = {
         "KEY_PRICE": price,
-				"KEY_CHANGE": change
+				"KEY_CHANGE": change,
+				"KEY_NEGATIVE": isNegative
       };
 
       // Send to Pebble

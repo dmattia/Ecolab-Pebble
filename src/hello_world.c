@@ -1,9 +1,10 @@
 #include <pebble.h>
-
+	
 enum {
   KEY_TEMPERATURE = 0,
 	KEY_PRICE = 2,
-	KEY_CHANGE = 3
+	KEY_CHANGE = 3,
+	KEY_NEGATIVE = 4
 };
 	
 Window *window;
@@ -13,7 +14,7 @@ static TextLayer* s_stock_price_layer;
 static TextLayer* s_date_layer;
 static BitmapLayer * s_background_layer;
 static GBitmap * s_background_bitmap;
-static  int isNegative;
+static int goingDown; // 1 if stock change is negative, 0 otherwise
 
 static void update_time() {
   // Get a tm structure
@@ -66,9 +67,18 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 			break;
 		case KEY_CHANGE:
 			snprintf(stock_change_buffer, sizeof(stock_change_buffer), "%s", t->value->cstring);
-			if(stock_change_buffer[0] == '-') {
-				isNegative = 1;
-			} else isNegative = 0;
+			break;
+		case KEY_NEGATIVE:
+			goingDown = (int)t->value->int32;
+			APP_LOG(APP_LOG_LEVEL_DEBUG,"goingDown: %d",goingDown);
+			#ifdef PBL_COLOR
+				APP_LOG(APP_LOG_LEVEL_DEBUG,"goingDown in preprocessor: %d",goingDown);
+				if(goingDown) {
+					text_layer_set_text_color(s_stock_price_layer, GColorRed);
+				} else {
+					text_layer_set_text_color(s_stock_price_layer, GColorJaegerGreen);
+		    }
+			#endif
 			break;
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -143,13 +153,6 @@ void handle_init(void) {
 	// Setup for stock layer
 	text_layer_set_text(s_stock_price_layer, "...");
 	text_layer_set_font(s_stock_price_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-	#ifdef PBL_COLOR
-		if(isNegative) {
-		  text_layer_set_text_color(s_stock_price_layer, GColorRed);	
-	  } else {
-			text_layer_set_text_color(s_stock_price_layer, GColorJaegerGreen);
-	  }
-	#endif
 	text_layer_set_text_alignment(s_stock_price_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_stock_price_layer, GColorClear);
 	
@@ -169,12 +172,8 @@ void handle_init(void) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_stock_price_layer));
 
-
 	// Push the window
 	window_stack_push(window, true);
-	
-	// App Logging!
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed a window!");
 }
 
 void handle_deinit(void) {
@@ -182,6 +181,7 @@ void handle_deinit(void) {
 	text_layer_destroy(s_weather_layer);
 	text_layer_destroy(s_stock_price_layer);
 	text_layer_destroy(s_date_layer);
+	gbitmap_destroy(s_background_bitmap);
 	bitmap_layer_destroy(s_background_layer);
 	window_destroy(window);
 }
