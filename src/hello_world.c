@@ -90,7 +90,15 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   }  
 	
   // Assemble full string and display
-	snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s %s", stock_price_buffer, stock_change_buffer);
+	#ifndef PBL_COLOR
+	if(goingDown) {
+		snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s -%s", stock_price_buffer, stock_change_buffer);
+	} else {
+		snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s +%s", stock_price_buffer, stock_change_buffer);
+	}
+	#else
+		snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s %s", stock_price_buffer, stock_change_buffer);
+	#endif
   text_layer_set_text(s_weather_layer, weather_layer_buffer);
 	text_layer_set_text(s_stock_price_layer, stock_layer_buffer);
 }
