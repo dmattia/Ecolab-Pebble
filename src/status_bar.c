@@ -26,7 +26,7 @@ typedef struct {
 
 static void update_proc(Layer* layer, GContext *context);
 
-CustomStatusBarLayer * custom_status_bar_layer_create(uint8_t height, GColor bar_colour, uint8_t icon_width){
+CustomStatusBarLayer * custom_status_bar_layer_create(uint8_t height, GColor bar_colour, GColor text_color, uint8_t icon_width){
 
     if(icon_width > MAX_ICON_WIDTH){
         APP_LOG(APP_LOG_LEVEL_ERROR, "ERROR: ICON WIDTH TOO LARGE. SEE MAX_ICON_WIDTH. STATUS BAR NOT CREATED. RETURNING NULL.");
@@ -55,12 +55,7 @@ CustomStatusBarLayer * custom_status_bar_layer_create(uint8_t height, GColor bar
     status_hidden->height = height;
     status_hidden->icon_width = icon_width;
     status_hidden->bar_colour = bar_colour;
-    // TextColor
-		if(gcolor_equal(bar_colour, GColorBlack)) {
-        status_hidden->text_colour = GColorWhite;    
-    }else{
-        status_hidden->text_colour = GColorBlack;
-    }
+    status_hidden->text_colour = text_color;    
 
     status_hidden->left_text = NULL;
     status_hidden->center_text = NULL;

@@ -14,12 +14,19 @@ enum {
 Window *window;
 static TextLayer* s_time_layer;
 static CustomStatusBarLayer *custom_status_bar;
-static TextLayer* s_weather_layer;
 static TextLayer* s_stock_price_layer;
-static TextLayer* s_date_layer;
 static BitmapLayer * s_background_layer;
 static GBitmap * s_background_bitmap;
 static int goingDown; // 1 if stock change is negative, 0 otherwise
+
+char * const_to_mutable(const char* original) {
+	unsigned int i = 0, length = strlen(original);
+	char* mutableVersion = malloc(sizeof(char) * length);
+	for(i = 0; i < length; ++i) {
+		mutableVersion[i] = original[i];
+	}
+	return mutableVersion;
+}
 
 static void update_time() {
   // Get a tm structure
@@ -43,7 +50,8 @@ static void update_time() {
 
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, time_buffer);
-	text_layer_set_text(s_date_layer, date_buffer);
+	
+	custom_status_bar_layer_set_text(custom_status_bar, CSB_TEXT_RIGHT, date_buffer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -51,16 +59,16 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	
 	//Ask to update stock and weather info
 	if(tick_time->tm_min % 15 == 0) {
- 	 // Begin dictionary
- 	 DictionaryIterator *iter;
- 	 app_message_outbox_begin(&iter);
+ 	  // Begin dictionary
+ 	  DictionaryIterator *iter;
+ 	  app_message_outbox_begin(&iter);
 	
 	  // Add a key-value pair
 	  dict_write_uint8(iter, 0, 0);
 
-  	// Send the message!
-  	app_message_outbox_send();
-   }
+    // Send the message!
+    app_message_outbox_send();
+  }
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
@@ -117,8 +125,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 	#else
 		snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s %s", stock_price_buffer, stock_change_buffer);
 	#endif
-  text_layer_set_text(s_weather_layer, weather_layer_buffer);
 	text_layer_set_text(s_stock_price_layer, stock_layer_buffer);
+	custom_status_bar_layer_set_text(custom_status_bar, CSB_TEXT_LEFT, weather_layer_buffer);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -136,7 +144,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 void handle_init(void) {
 	//Create bitmap
 	s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ECOLAB);
-	s_background_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
+	s_background_layer = bitmap_layer_create(GRect(0, BAR_HEIGHT, 144, 168 - BAR_HEIGHT));
 	bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
 	
 	// Register callbacks
@@ -150,15 +158,17 @@ void handle_init(void) {
 	
 	// Create a window and other layers
 	window = window_create();
-	s_time_layer = text_layer_create(GRect(0,69,144,29));
-	s_weather_layer = text_layer_create(GRect(0, 130, 48, 25));
-	s_stock_price_layer = text_layer_create(GRect(0, 100, 144, 29));
-	s_date_layer = text_layer_create(GRect(96, 130, 48, 25));
-	custom_status_bar = custom_status_bar_layer_create(BAR_HEIGHT, GColorBlack, ICON_WIDTH_HEIGHT);
+	s_time_layer = text_layer_create(GRect(0,69 + BAR_HEIGHT,144,29));
+	s_stock_price_layer = text_layer_create(GRect(0, 95 + BAR_HEIGHT, 144, 29));
+	#ifdef PBL_COLOR
+		custom_status_bar = custom_status_bar_layer_create(BAR_HEIGHT, GColorVividCerulean, GColorWhite, ICON_WIDTH_HEIGHT);
+	#else
+		custom_status_bar = custom_status_bar_layer_create(BAR_HEIGHT, GColorBlack, GColorWhite, ICON_WIDTH_HEIGHT);
+	#endif
 	
 	// Register with TickTimerService
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-		
+	
 	// Setup for stock layer
 	text_layer_set_text(s_stock_price_layer, "...");
 	text_layer_set_font(s_stock_price_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
@@ -173,31 +183,15 @@ void handle_init(void) {
 	#endif
 	text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_time_layer, GColorClear);
-	
-	// Setup for weather layer
-	text_layer_set_text(s_weather_layer, "...");
-	text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-	#ifdef PBL_COLOR
-		text_layer_set_text_color(s_weather_layer, GColorBlue);	
-	#endif
-	text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
-	text_layer_set_background_color(s_weather_layer, GColorClear);
 
-	// Setup for date layer
-	text_layer_set_text(s_date_layer, "...");
-	text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-	#ifdef PBL_COLOR
-		text_layer_set_text_color(s_date_layer, GColorBlue);	
-	#endif
-	text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
-	text_layer_set_background_color(s_date_layer, GColorClear);
+	// Setup Title Layer
+	custom_status_bar_layer_set_text(custom_status_bar, CSB_TEXT_CENTER, "Hello Paul");
 	
 	// Add layers to window
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_stock_price_layer));
+	layer_add_child(window_get_root_layer(window), custom_status_bar);
 
 	// Push the window
 	window_stack_push(window, true);
@@ -205,9 +199,7 @@ void handle_init(void) {
 
 void handle_deinit(void) {
 	text_layer_destroy(s_time_layer);
-	text_layer_destroy(s_weather_layer);
 	text_layer_destroy(s_stock_price_layer);
-	text_layer_destroy(s_date_layer);
 	custom_status_bar_layer_destroy(custom_status_bar);
 	gbitmap_destroy(s_background_bitmap);
 	bitmap_layer_destroy(s_background_layer);

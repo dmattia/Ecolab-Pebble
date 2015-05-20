@@ -21,7 +21,7 @@ typedef enum {
 } CsbIconPosition;
 
 //icon_width determines both the width and height of the BitmapLayers being created in the status bar
-CustomStatusBarLayer * custom_status_bar_layer_create(uint8_t height, GColor bar_colour, uint8_t icon_width);
+CustomStatusBarLayer * custom_status_bar_layer_create(uint8_t height, GColor bar_colour, GColor text_color, uint8_t icon_width);
 void custom_status_bar_layer_destroy(CustomStatusBarLayer* custom_status_bar_layer);
 void custom_status_bar_layer_set_text(CustomStatusBarLayer* custom_status_bar_layer, CsbTextPosition position, char* status_bar_text);
 void custom_status_bar_layer_set_text_font(CustomStatusBarLayer* custom_status_bar_layer, CsbTextPosition position, GFont font);
