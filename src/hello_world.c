@@ -1,4 +1,8 @@
 #include <pebble.h>
+#include "status_bar.h"
+	
+#define BAR_HEIGHT 20
+#define ICON_WIDTH_HEIGHT 15
 	
 enum {
   KEY_TEMPERATURE = 0,
@@ -9,6 +13,7 @@ enum {
 	
 Window *window;
 static TextLayer* s_time_layer;
+static CustomStatusBarLayer *custom_status_bar;
 static TextLayer* s_weather_layer;
 static TextLayer* s_stock_price_layer;
 static TextLayer* s_date_layer;
@@ -26,7 +31,7 @@ static void update_time() {
 	static char date_buffer[] = "01/01";
 
   // Write the current hours and minutes into the buffer
-  if(clock_is_24h_style() == true) {
+  if(clock_is_24h_style()) {
     // Use 24 hour format
     strftime(time_buffer, sizeof("00:00"), "%H:%M", tick_time);
   } else {
@@ -43,6 +48,19 @@ static void update_time() {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	update_time();
+	
+	//Ask to update stock and weather info
+	if(tick_time->tm_min % 15 == 0) {
+ 	 // Begin dictionary
+ 	 DictionaryIterator *iter;
+ 	 app_message_outbox_begin(&iter);
+	
+	  // Add a key-value pair
+	  dict_write_uint8(iter, 0, 0);
+
+  	// Send the message!
+  	app_message_outbox_send();
+   }
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
@@ -132,17 +150,24 @@ void handle_init(void) {
 	
 	// Create a window and other layers
 	window = window_create();
-	s_time_layer = text_layer_create(GRect(0,140,144,20));
-	s_weather_layer = text_layer_create(GRect(0, 140, 48, 20));
-	s_stock_price_layer = text_layer_create(GRect(0, 100, 144, 30));
-	s_date_layer = text_layer_create(GRect(96, 140, 48, 20));
+	s_time_layer = text_layer_create(GRect(0,69,144,29));
+	s_weather_layer = text_layer_create(GRect(0, 130, 48, 25));
+	s_stock_price_layer = text_layer_create(GRect(0, 100, 144, 29));
+	s_date_layer = text_layer_create(GRect(96, 130, 48, 25));
+	custom_status_bar = custom_status_bar_layer_create(BAR_HEIGHT, GColorBlack, ICON_WIDTH_HEIGHT);
 	
 	// Register with TickTimerService
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+		
+	// Setup for stock layer
+	text_layer_set_text(s_stock_price_layer, "...");
+	text_layer_set_font(s_stock_price_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+	text_layer_set_text_alignment(s_stock_price_layer, GTextAlignmentCenter);
+	text_layer_set_background_color(s_stock_price_layer, GColorClear);
 	
 	// Setup for time layer
 	text_layer_set_text(s_time_layer, "00:00");
-	text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
 	#ifdef PBL_COLOR
 		text_layer_set_text_color(s_time_layer, GColorBlue);	
 	#endif
@@ -151,22 +176,16 @@ void handle_init(void) {
 	
 	// Setup for weather layer
 	text_layer_set_text(s_weather_layer, "...");
-	text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
 	#ifdef PBL_COLOR
 		text_layer_set_text_color(s_weather_layer, GColorBlue);	
 	#endif
 	text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_weather_layer, GColorClear);
-	
-	// Setup for stock layer
-	text_layer_set_text(s_stock_price_layer, "...");
-	text_layer_set_font(s_stock_price_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-	text_layer_set_text_alignment(s_stock_price_layer, GTextAlignmentCenter);
-	text_layer_set_background_color(s_stock_price_layer, GColorClear);
-	
+
 	// Setup for date layer
 	text_layer_set_text(s_date_layer, "...");
-	text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
 	#ifdef PBL_COLOR
 		text_layer_set_text_color(s_date_layer, GColorBlue);	
 	#endif
@@ -189,6 +208,7 @@ void handle_deinit(void) {
 	text_layer_destroy(s_weather_layer);
 	text_layer_destroy(s_stock_price_layer);
 	text_layer_destroy(s_date_layer);
+	custom_status_bar_layer_destroy(custom_status_bar);
 	gbitmap_destroy(s_background_bitmap);
 	bitmap_layer_destroy(s_background_layer);
 	window_destroy(window);
