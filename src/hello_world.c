@@ -96,7 +96,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 			break;
 		case KEY_NEGATIVE:
 			goingDown = (int)t->value->int32;
-			APP_LOG(APP_LOG_LEVEL_DEBUG,"goingDown: %d",goingDown);
 			#ifdef PBL_COLOR
 				APP_LOG(APP_LOG_LEVEL_DEBUG,"goingDown in preprocessor: %d",goingDown);
 				if(goingDown) {
@@ -179,7 +178,7 @@ void handle_init(void) {
 	text_layer_set_text(s_time_layer, "00:00");
 	text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
 	#ifdef PBL_COLOR
-		text_layer_set_text_color(s_time_layer, GColorBlue);	
+		text_layer_set_text_color(s_time_layer, GColorPictonBlue);	
 	#endif
 	text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	text_layer_set_background_color(s_time_layer, GColorClear);

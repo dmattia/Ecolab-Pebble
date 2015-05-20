@@ -22,7 +22,7 @@ function getPrice() {
       console.log("Stock price is " + price);
 			
 			// Get stock change
-			var changeFloat = parseFloat(json.results.collection2[0].prev_close) - parseFloat(price);
+			var changeFloat = parseFloat(price) - parseFloat(json.results.collection2[0].prev_close);
 			var change = json.results.collection1[1].property1;
 			var isNegative = 0;
 			console.log("Stock change is " + changeFloat);
