@@ -143,7 +143,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 void handle_init(void) {
 	//Create bitmap
 	s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ECOLAB);
-	s_background_layer = bitmap_layer_create(GRect(0, BAR_HEIGHT, 144, 168 - BAR_HEIGHT));
+	s_background_layer = bitmap_layer_create(GRect(0, 6 + BAR_HEIGHT, 144, 162 - BAR_HEIGHT));
 	bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
 	
 	// Register callbacks
@@ -157,8 +157,8 @@ void handle_init(void) {
 	
 	// Create a window and other layers
 	window = window_create();
-	s_time_layer = text_layer_create(GRect(0,69 + BAR_HEIGHT,144,29));
-	s_stock_price_layer = text_layer_create(GRect(0, 95 + BAR_HEIGHT, 144, 29));
+	s_time_layer = text_layer_create(GRect(0,110 + BAR_HEIGHT,144,29));
+	s_stock_price_layer = text_layer_create(GRect(0, 80 + BAR_HEIGHT, 144, 29));
 	#ifdef PBL_COLOR
 		custom_status_bar = custom_status_bar_layer_create(BAR_HEIGHT, GColorVividCerulean, GColorWhite, ICON_WIDTH_HEIGHT);
 	#else
