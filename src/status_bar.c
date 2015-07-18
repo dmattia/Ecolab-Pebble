@@ -101,7 +101,7 @@ void custom_status_bar_layer_set_text(CustomStatusBarLayer* custom_status_bar_la
         if(status_hidden->left_text == NULL){
             status_hidden->left_text = text_layer_create(GRect(0, 0, PEBBLE_WIDTH, status_hidden->height));
             text_layer_set_text_alignment(status_hidden->left_text, GTextAlignmentLeft);
-            text_layer_set_font(status_hidden->left_text, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+            text_layer_set_font(status_hidden->left_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
             text_layer_set_text_color(status_hidden->left_text, status_hidden->text_colour);
             text_layer_set_background_color(status_hidden->left_text, GColorClear);
             layer_add_child(custom_status_bar_layer, text_layer_get_layer(status_hidden->left_text));
@@ -113,7 +113,7 @@ void custom_status_bar_layer_set_text(CustomStatusBarLayer* custom_status_bar_la
         if(status_hidden->right_text == NULL){
             status_hidden->right_text = text_layer_create(GRect(0, 0, PEBBLE_WIDTH, status_hidden->height));
             text_layer_set_text_alignment(status_hidden->right_text, GTextAlignmentRight);
-            text_layer_set_font(status_hidden->right_text, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+            text_layer_set_font(status_hidden->right_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
             text_layer_set_text_color(status_hidden->right_text, status_hidden->text_colour);
             text_layer_set_background_color(status_hidden->right_text, GColorClear);
             layer_add_child(custom_status_bar_layer, text_layer_get_layer(status_hidden->right_text));
@@ -125,7 +125,7 @@ void custom_status_bar_layer_set_text(CustomStatusBarLayer* custom_status_bar_la
         if(status_hidden->center_text == NULL){  
             status_hidden->center_text = text_layer_create(GRect(0, 0, PEBBLE_WIDTH, status_hidden->height));
             text_layer_set_text_alignment(status_hidden->center_text, GTextAlignmentCenter);
-            text_layer_set_font(status_hidden->center_text, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+            text_layer_set_font(status_hidden->center_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
             text_layer_set_text_color(status_hidden->center_text, status_hidden->text_colour);
             text_layer_set_background_color(status_hidden->center_text, GColorClear);
             layer_add_child(custom_status_bar_layer, text_layer_get_layer(status_hidden->center_text));

@@ -1,8 +1,8 @@
 #include <pebble.h>
 #include "status_bar.h"
 	
-#define BAR_HEIGHT 20
-#define ICON_WIDTH_HEIGHT 15
+#define BAR_HEIGHT 25
+#define ICON_WIDTH_HEIGHT 25
 	
 enum {
   KEY_TEMPERATURE = 0,
@@ -57,8 +57,8 @@ static void update_time() {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	update_time();
 	
-	//Ask to update stock and weather info
-	if(tick_time->tm_min % 15 == 0) {
+	//Ask to update stock and weather info every 5 minutes
+	if(tick_time->tm_min % 5 == 0) {
  	  // Begin dictionary
  	  DictionaryIterator *iter;
  	  app_message_outbox_begin(&iter);
@@ -184,7 +184,7 @@ void handle_init(void) {
 	text_layer_set_background_color(s_time_layer, GColorClear);
 
 	// Setup Title Layer
-	custom_status_bar_layer_set_text(custom_status_bar, CSB_TEXT_CENTER, "Hello Paul");
+	custom_status_bar_layer_set_text(custom_status_bar, CSB_TEXT_CENTER, "Ecolab");
 	
 	// Add layers to window
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
